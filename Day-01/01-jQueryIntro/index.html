@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="jquery-2.1.4.js"></script>
+    <script>
+    function init(){    
+        $("#btnGreet").click(function(){
+            var firstName = $("#txtFirstName").val(),
+                lastName = $("#txtLastName").val();
+            var msg = "Hi " + firstName + "  " + lastName + "!!!";
+            $("#divMessage").html(msg);
+        });
+    }
+    //$(document).ready(init);
+    $(init);
+    
+    </script>
+</head>
+<body>
+    <input type="text" name="" id="txtFirstName">
+    <input type="text" name="" id="txtLastName">
+    <input type="button" value="Greet" id="btnGreet">
+    <div id="divMessage"></div>
+</body>
+</html>
