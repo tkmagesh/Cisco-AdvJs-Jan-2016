@@ -296,3 +296,6 @@ function bind(fn, obj, args){
       return fn.apply(obj, args);
    }
 }
+
+whoAmI = bind(whoAmI, emp);
+
