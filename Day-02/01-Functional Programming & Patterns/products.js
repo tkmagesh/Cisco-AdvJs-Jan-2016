@@ -159,3 +159,140 @@ describe("Filter", function(){
        });
    });
 });
+
+describe("All", function(){
+    function all(list, criteriaFn){
+        for(var i=0; i<list.length; i++)
+            if (!criteriaFn(list[i])) return false;
+        return true;
+    }
+    describe("Are all products costly?", function(){
+        var costlyProductCriteriaFn = function(product){
+           return product.cost > 50;
+       };
+        console.log(all(products, costlyProductCriteriaFn));
+    });
+});
+describe("Any", function(){
+    function any(list, criteriaFn){
+        for(var i=0; i<list.length; i++)
+            if (criteriaFn(list[i])) return true;
+        return false;
+    }
+    describe("Are there any costly products?", function(){
+        var costlyProductCriteriaFn = function(product){
+           return product.cost > 50;
+       };
+        console.log(any(products, costlyProductCriteriaFn));
+    });
+});
+
+describe("Sum", function(){
+    function sum(list, valueSelector){
+        var result = 0;
+        for(var i=0; i<list.length; i++)
+            result += valueSelector(list[i]);
+        return result;
+    }
+    describe("Sum of all units ", function(){
+        var sumOfAllUnits =sum(products, function(product){return product.units;});
+        console.log(sumOfAllUnits);
+    })
+});
+describe("Max", function(){
+    function max(list, valueSelector){
+        var result = valueSelector(list[0]);
+        for(var i=1; i<list.length; i++){
+            var itemValue = valueSelector(list[i]);
+            result = result < itemValue ? itemValue : result;
+        }
+        return result;
+    }
+    describe("Max of Cost ", function(){
+        var maxOfCost =max(products, function(product){return product.cost;});
+        console.log(maxOfCost);
+    })
+});
+
+describe("Aggregate", function(){
+    function aggregate(list, iterator, seed){
+        var start = 0;
+        if (typeof seed === 'undefined'){
+            start = 1;
+            seed = list[0];
+        }
+        var result = seed;
+        for(var i=start; i<list.length; i++){
+            result = iterator(result, list[i]);
+        }
+        return result;
+    }
+    var sumOfUnits = aggregate(products, function(result, product){
+        return result + product.units;
+    }, 0);
+    console.log("Sum of product units = ", sumOfUnits);
+
+    var sumOfNumbers = aggregate([10,20,30,40], function(result, no){
+        return result + no;
+    });
+    console.log("Sum of numbers = ", sumOfNumbers);
+
+    var aggregateCost = aggregate(products, function(result, product){
+        return {
+            totalCost : result.totalCost + product.cost,
+            productCount : ++result.productCount
+        }
+    }, { totalCost : 0, productCount : 0});
+    console.log("Average product cost = ", aggregateCost.totalCost / aggregateCost.productCount);
+});
+
+describe("GroupBy", function(){
+   function groupBy(list, keySelectorFn){
+       var result = {};
+       for(var i=0; i<list.length; i++){
+           var key = keySelectorFn(list[i]);
+           result[key] = result[key] || [];
+           result[key].push(list[i]);
+       }
+       return result;
+   };
+   function describeGroup(group){
+       for(var key in group){
+           describe("Key - " + key, function(){
+               console.table(group[key]);
+           });
+       }
+   }
+   describe("Products by category", function(){
+       var productsByCategory = groupBy(products, function(product){
+           return product.category;
+       });
+       describeGroup(productsByCategory);
+   });
+   describe("Products by cost ", function(){
+       var productsByCost = groupBy(products, function(product){
+           return product.cost > 50 ? "costly" : "affordable";
+       });
+       describeGroup(productsByCost);
+   });
+});
+
+describe("map", function(){
+    function map(list, transformFn){
+        var result = [];
+        for(var i=0; i<list.length; i++){
+            result.push(transformFn(list[i]));
+        }
+        return result;
+    }
+    console.table(map(products, function(p){
+        return {name : p.name, value : p.cost * p.units}
+    }));
+});
+
+
+function bind(fn, obj, args){
+   return function(){
+      return fn.apply(obj, args);
+   }
+}
